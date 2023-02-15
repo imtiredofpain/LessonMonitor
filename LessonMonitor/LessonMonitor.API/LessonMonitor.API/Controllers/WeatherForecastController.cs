@@ -11,18 +11,6 @@ namespace LessonMonitor.API.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
-        }
-
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
@@ -31,9 +19,60 @@ namespace LessonMonitor.API.Controllers
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
             })
             .ToArray();
         }
+
+        [HttpGet("model")]
+        public WeatherForecast GetWeatherForecastModel()
+        {
+            var weatherForecastModel = typeof(WeatherForecast);
+
+            var constructors = weatherForecastModel.GetConstructors();
+
+            var defaultConstructor = constructors.FirstOrDefault(x => x.GetParameters().Length == 0);
+            
+            var obj = defaultConstructor.Invoke(null);
+
+            var properties = weatherForecastModel.GetProperties();
+
+            foreach (var property in properties)
+            {
+                if (_weatherforecastvalue.TryGetValue(property.Name, out var value))
+                {
+                //    if (property.PropertyType.Name == "DateTime")
+                //    {
+                //        var date = DateTime.Parse(value);
+                //        property.SetValue(obj, date);
+                //    }
+
+                //    if (property.PropertyType.Name == "Int32")
+                //    {
+                //        var number = Int32.Parse(value);
+                //        property.SetValue(obj, number);
+                //    }
+
+                //    if (property.PropertyType.Name == "String")
+                //    {
+                //        property.SetValue(obj, value);
+                //    }
+
+                    var specified = Convert.ChangeType(value, property.PropertyType); 
+                    property.SetValue(obj, specified);  
+                }
+
+            }
+
+            return (WeatherForecast)obj;
+        }
+
+        private Dictionary<string, string> _weatherforecastvalue = new Dictionary<string, string>
+        {
+            {"Date", DateTime.Now.ToString() },
+            {"TemperatureC", "232" },
+            {"Summary", Guid.NewGuid().ToString() },
+        };
+
+     
     }
 }

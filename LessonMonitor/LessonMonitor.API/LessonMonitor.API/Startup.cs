@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace LessonMonitor.API
@@ -50,10 +52,41 @@ namespace LessonMonitor.API
 
             app.UseAuthorization();
 
+
+            app.UseMiddleware<MyMiddlewareComponent>();
+
+            app.Use((httpContext, next) =>
+            {
+                var task = next();
+
+                return task;
+            });
+
+            //app.UseMiddleware<MyRequestLoggerComponent>();
+
+
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
         }
+        
+        //public class MyRequestLoggerComponent
+        //{
+        //    private  readonly RequestDelegate  _next;
+
+        //    public MyRequestLoggerComponent(RequestDelegate next)
+        //    {
+        //        _next = next;
+        //    }
+
+        //    public async Task Invoke(HttpContext context)
+        //    {
+
+        //    }
+        //}
+
     }
+
 }
